@@ -10,10 +10,10 @@ def get_wavefunction_naive(fill, q, z, n_idx):
         psi *= np.prod((z[i] - z[:i]) ** (-eta)) * np.prod((z[i] - z[i+1:]) ** (-eta))
     return psi
 
-def get_wavefunction(fill, q, z, n_idx):
+def get_wavefunction(n_particles, q, z, n_idx):
     import numpy as np
     N = len(z)
-    eta = fill * q
+    eta = n_particles / N * q
     z = np.reshape(z, (1, N))
     z_particles = z[0, [n_idx]]
     A = (z_particles -  np.transpose(z_particles)) ** q
@@ -26,7 +26,6 @@ def get_wavefunction(fill, q, z, n_idx):
 
 if __name__ == '__main__':
     import numpy as np
-    from get_lattice import get_plane
     from time import time
     fill = 1 / 2
     q = 2
