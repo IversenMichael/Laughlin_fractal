@@ -1,18 +1,47 @@
-def get_wavefunction_naive(fill, q, z, n_idx):
+def get_wavefunction_naive(z, n_idx, q):
+    """
+    Computes the wave function for a specific particle distribution
+    :param z: Position of sites
+    :param n_idx: List of particle positions (occupied sites)
+    :return:
+    """
     import numpy as np
-    eta = fill * q
-    psi = 1
-    for i in n_idx:
-        for j in n_idx:
+    filling = len(n_idx)/len(z)
+    eta = filling * q
+    psi = np.array([1], dtype=np.complex128) # Initialize psi
+    for i in n_idx: # Loop though all particles
+        for j in n_idx: # --||--
             if i < j:
-                psi *= (z[i] - z[j]) ** q
-    for i in n_idx:
-        psi *= np.prod((z[i] - z[:i]) ** (-eta)) * np.prod((z[i] - z[i+1:]) ** (-eta))
+                psi *= (z[i] - z[j]) ** q # Compute the first factor
+    for i in n_idx: # Loop through all particles
+        for j in range(len(z)):
+            if i != j:
+                psi *= (z[i] - z[j]) ** (-eta) # Compute second factor
     return psi
 
-def get_wavefunction(n_particles, q, z, n_idx):
+def get_wavefunction_naive_restricted(z, n_idx, q):
+    """
+    Computes the wave function for a specific particle distribution. Only works if eta = 1.
+    :param z: Position of sites
+    :param n_idx: List of particle positions (occupied sites)
+    :return:
+    """
+    import numpy as np
+    filling = len(n_idx)/len(z)
+    eta = filling * q
+    psi = np.array([1], dtype=np.complex128) # Initialize psi
+    for i in n_idx: # Loop though all particles
+        for j in n_idx: # --||--
+            if i < j:
+                psi *= (z[i] - z[j]) ** 2 # Compute the first factor
+    for i in n_idx: # Loop through all particles
+        psi *= z[i] # Compute second factor
+    return psi
+
+def get_wavefunction(z, n_idx, q):
     import numpy as np
     N = len(z)
+    n_particles = len(n_idx)
     eta = n_particles / N * q
     z = np.reshape(z, (1, N))
     z_particles = z[0, [n_idx]]
@@ -25,12 +54,4 @@ def get_wavefunction(n_particles, q, z, n_idx):
 
 
 if __name__ == '__main__':
-    import numpy as np
-    from time import time
-    fill = 1 / 2
-    q = 2
-    z = get_fractal() / 4.33
-    N = len(z)
-    n_idx = np.sort(np.random.choice(list(range(N)), size=N//2, replace=False))
-    print(get_wavefunction_naive(fill, q, z, n_idx))
-    print(get_wavefunction(fill, q, z, n_idx))
+    pass
