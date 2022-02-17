@@ -17,9 +17,6 @@ def main():
 
     # ---------------------- Calculate operators ---------------------- #
     generator = operator_generator(basis, z)
-    sites = []
-    D = []
-    P = []
     operators = next(generator)
 
     # ------------ Calculate the correct linear combination of operators ------------ #
@@ -37,8 +34,12 @@ def operator_generator(basis, z):
     :return:
     """
     operators = [] # Container for operators
+    operator_dict = dict()
+    counter = 0
     for site1, z1 in enumerate(z): # Loop through all lattice sites
         operators = operators + [number_operator(basis, site1)] # Append the number operator on site 1
+        operator_dict[counter] = ('Number operator', site1)
+        counter += 1
         print(f"site1 = {site1}")
         for offset in [1, 1j]: # Site 1 can interact with the site above it and to the right of it.
             z2 = z1 + offset # Find the position of a neighbouring site
@@ -46,7 +47,11 @@ def operator_generator(basis, z):
                 site2 = z_dict[z2] # Find the index of this lattice site
                 # Append the interaction and hopping between these sites
                 operators = operators + [interaction(basis, site1, site2), hopping(basis, basis_dict, site2, site1) + hopping(basis, basis_dict, site1, site2)]
-    yield operators
+                operator_dict[counter] = ('Interaction', site1, site2)
+                counter += 1
+                operator_dict[counter] = ('Hopping', site1, site2)
+                counter += 1
+    yield operators, operator_dict
 
 def find_combination(psi, operators):
     """
