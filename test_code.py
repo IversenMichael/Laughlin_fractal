@@ -10,7 +10,6 @@ def main():
     import numpy as np
     import sys
     np.set_printoptions(precision=4)
-    sys.path.append('C:\\Users\\au544901\\Documents\\GitHub\\Laughlin_fractal')
     from get_wavefunction import get_wavefunction_naive, get_wavefunction_naive_restricted, get_wavefunction
     from get_psi import get_psi
     # ------------ Initialize quantities ------------ #
@@ -31,7 +30,7 @@ def main():
 
     print('')
     print('# ---------------- First method ---------------- #')
-    # Firste we test the method from the first article
+    # First we test the method from the first article
     psi_T = np.conj(np.transpose(psi)) # Hermitian conjugate of psi
     C = np.zeros((len(operators), len(operators)), dtype=np.complex128) # Container for C matrix
     for i, o1 in enumerate(operators): # Loop through all operators
@@ -107,6 +106,7 @@ def main():
     boolian = np.sum(np.abs(sum([(np.transpose(v) @ Q2[:, [i]]) * Q2[:, [i]] for i in range(Q2.shape[1])]) - v)) < 1e-9
     print(f'Does Hb hide within V2? \t\t Answer = {boolian}')
 
+    print('')
     print('# ---------- Is the wave function computed correctly? ----------  #')
     q = 2
     n_tests = 100

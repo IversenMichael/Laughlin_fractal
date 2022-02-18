@@ -1,9 +1,10 @@
 def main():
     import numpy as np
     import sys
-    sys.path.append('C:\\Users\\au544901\\Documents\\GitHub\\Laughlin_fractal')
     from get_lattice import get_fractal
     from get_psi import get_psi
+    from matplotlib import pyplot as plt
+    from scipy.stats.mstats import trimmed_mean, trimmed_std
 
     # ---------------------- Initialize system ---------------------- #
     z = get_fractal()
@@ -16,42 +17,48 @@ def main():
         z_dict[x] = i
 
     # ---------------------- Calculate operators ---------------------- #
-    generator = operator_generator(basis, z)
-    operators = next(generator)
+    generator = operator_generator(basis, basis_dict, z, z_dict)
+    operators, site1, site2 = next(generator)
 
     # ------------ Calculate the correct linear combination of operators ------------ #
     print(f"site1 = {site1}, site2 = {site2}")
     d, p = find_combination(psi, operators)
     o = sum([p[i, -1]*operators[i] for i in range(len(p))])
     psi_T = np.transpose(np.conj(psi))
-    print(psi_T@o@o@psi - (psi_T@o@psi)**2)
+    print(psi_T@ o @ o @ psi - (psi_T @ o @ psi)**2)
+    l = np.transpose(np.conj(psi)) @ o @ psi
+    err = np.abs(o @ psi - l * psi)
+    print(f"mean(err) = {np.mean(err)}")
+    print(f"median(err) = {np.median(err)}")
+    print(f"std(err) = {np.std(err)}")
+    print(f"max(err) = {max(err)}")
+    print(f"trimmed_mean(err) = {trimmed_mean(err)}")
+    print(f"trimmed_std(err) = {trimmed_std(err)}")
+    bins = np.linspace(0, trimmed_mean(err) + 3*trimmed_std(err), 100)
 
-def operator_generator(basis, z):
+    fig, ax = plt.subplots()
+    ax.grid()
+    ax.hist(err, bins=bins, density=True)
+
+
+def operator_generator(basis, basis_dict, z, z_dict):
     """
     Generates a list of operators
     :param basis: List of basis elements
     :param z: List of lattice positions
     :return:
     """
-    operators = [] # Container for operators
-    operator_dict = dict()
-    counter = 0
     for site1, z1 in enumerate(z): # Loop through all lattice sites
-        operators = operators + [number_operator(basis, site1)] # Append the number operator on site 1
-        operator_dict[counter] = ('Number operator', site1)
-        counter += 1
-        print(f"site1 = {site1}")
         for offset in [1, 1j]: # Site 1 can interact with the site above it and to the right of it.
+            operators = [number_operator(basis, site1)]  # Append the number operator on site 1
             z2 = z1 + offset # Find the position of a neighbouring site
             if z2 in z: # If this site is a part of the lattice
                 site2 = z_dict[z2] # Find the index of this lattice site
                 # Append the interaction and hopping between these sites
-                operators = operators + [interaction(basis, site1, site2), hopping(basis, basis_dict, site2, site1) + hopping(basis, basis_dict, site1, site2)]
-                operator_dict[counter] = ('Interaction', site1, site2)
-                counter += 1
-                operator_dict[counter] = ('Hopping', site1, site2)
-                counter += 1
-    yield operators, operator_dict
+                operators = operators + [number_operator(basis, site2),
+                                        interaction(basis, site1, site2),
+                                         hopping(basis, basis_dict, site2, site1) + hopping(basis, basis_dict, site1, site2)]
+            yield operators, site1, site2
 
 def find_combination(psi, operators):
     """
@@ -124,4 +131,4 @@ def hopping(basis, basis_dict, site1, site2):
     return hop.tocsc()
 
 if __name__ == '__main__':
-    pass
+    main()
