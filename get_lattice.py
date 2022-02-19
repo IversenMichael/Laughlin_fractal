@@ -34,7 +34,7 @@ def test_lattice():
     side_length = np.random.randint(2, 20)
     z = get_plane(side_length)
     fig, ax = plt.subplots()
-    ax.set_title('Plane with random side length')
+    ax.set_title(f'Plane with randomly chosen side length \n (side length = {side_length})')
     ax.grid()
     ax.axis('equal')
     ax.plot(np.real(z), np.imag(z), 'bo')
