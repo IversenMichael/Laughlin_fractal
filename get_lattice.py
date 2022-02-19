@@ -13,15 +13,40 @@ def get_fractal():
                 z = np.concatenate([z, z_single + 3 * x + 3j * y]) # Add next lattice point
     return z
 
-def get_plane():
+def get_plane(side_length):
     """
     Computes the lattice points of a 9x9 grid represented by complex numbers
+    :param side_length: Side length of grid, i.e. the grid contains side_length^2 sites
     :return:
     """
     import numpy as np
-    z = (np.arange(-4, 5).reshape((1, 9)) + 1j*np.arange(-4, 5).reshape((9, 1))).reshape((9 * 9, ))
+    total_size = side_length ** 2
+    low = -(side_length - 1) / 2
+    high = (side_length - 1) / 2 + 1
+    z = (np.arange(low, high, 1).reshape((1, side_length)) + 1j*np.arange(low, high, 1).reshape((side_length, 1))).reshape((total_size, ))
     return z
 
+def test_lattice():
+    from matplotlib import pyplot as plt
+    import numpy as np
+
+    # ----------- Plane ----------- #
+    side_length = np.random.randint(2, 20)
+    z = get_plane(side_length)
+    fig, ax = plt.subplots()
+    ax.set_title('Plane with random side length')
+    ax.grid()
+    ax.axis('equal')
+    ax.plot(np.real(z), np.imag(z), 'bo')
+
+    # ----------- Fractal ----------- #
+    z = get_fractal()
+    fig, ax = plt.subplots()
+    ax.set_title('Sierpinski carpet with 64 sites')
+    ax.grid()
+    ax.axis('equal')
+    ax.plot(np.real(z), np.imag(z), 'bo')
+
 if __name__ == '__main__':
-    pass
+    test_lattice()
 
